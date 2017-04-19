@@ -1,0 +1,44 @@
+Comments: 'Low Res Brown dwarf spectrum'
+PCA:
+  path: $jammer/sf/Gl570D/Marley_SpeX_PCA_Teff500-1000.hdf5
+  priors:
+  - [2.0, 0.0075]
+  - [2.0, 0.75]
+  threshold: 0.999
+Phi: {l: 20.0, logAmp: -2.0, sigAmp: 1.0}
+Phi_jump: {l: 0.25, logAmp: 0.01, sigAmp: 0.025}
+Theta:
+  Av: 0.0
+  grid: [800.0, 4.5]
+  logOmega: -5.0
+  vsini: 45.0
+  vz: 0.0
+Theta_jump:
+  Av: 0.01
+  grid: [3.0, 0.003, 0.001]
+  logOmega: 0.003
+  vsini: 0.05
+  vz: 0.05
+Theta_priors: $jammer/sf/Gl570D/user_prior.py
+cheb_degree: 4
+cheb_jump: 0.0001
+data:
+  files: [$jammer/data/reduced/Gl570D.hdf5]
+  grid_name: Marley
+  instruments: [SPEX_PRZ]
+  orders: [0]
+grid:
+  buffer: 500.0
+  hdf5_path: $jammer/sf/Gl570D/libraries/Marley_SpeX_Teff500-1000.hdf5
+  key_name: t{0:.0f}g{1:.1f}
+  parname: [temp, logg]
+  parrange:
+  - [500, 1000]
+  - [4.0, 5.5]
+  raw_path: $Starfish/libraries/raw/Marley/
+  wl_range: [10000, 25000]
+name: marley_grid
+outdir: output/
+plotdir: plots/
+region_params: {logAmp: -2.0, sigma: 7.0}
+sigma_clip: 4.0
