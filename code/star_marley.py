@@ -157,13 +157,9 @@ class Order:
 
         X = (self.chebyshevSpectrum.k * self.flux_std * np.eye(self.ndata)).dot(self.eigenspectra.T)
 
-        part1 = self.Omega**2 * self.flux_scalar**2 * X.dot(self.C_GP.dot(X.T))
+        part1 = X.dot(self.C_GP.dot(X.T))
         part2 = self.data_mat
-        
-        #CC = X.dot(self.C_GP.dot(X.T)) + self.data_mat
         CC = part1 + part2
-
-        CC = X.dot(self.C_GP.dot(X.T)) + self.data_mat
 
         try:
             factor, flag = cho_factor(CC)
@@ -174,7 +170,7 @@ class Order:
 
         try:
 
-            model1 = self.Omega * self.flux_scalar *(self.chebyshevSpectrum.k * self.flux_mean + X.dot(self.mus))
+            model1 = (self.chebyshevSpectrum.k * self.flux_mean + X.dot(self.mus))
             R = self.fl - model1
 
             logdet = np.sum(2 * np.log((np.diag(factor))))
@@ -299,6 +295,8 @@ class Order:
         self.mus, self.C_GP = self.emulator.matrix
         self.flux_scalar = self.emulator.absolute_flux
         self.Omega = 10**p.logOmega
+        self.flux_mean *= (self.Omega*self.flux_scalar)
+        self.flux_std *= (self.Omega*self.flux_scalar)
 
 
 class SampleThetaPhi(Order):
