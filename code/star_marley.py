@@ -22,6 +22,7 @@ from Starfish.spectrum import DataSpectrum, Mask, ChebyshevSpectrum
 from Starfish.emulator import Emulator
 import Starfish.constants as C
 from Starfish.covariance import get_dense_C, make_k_func, make_k_func_region
+from numpy.polynomial import Chebyshev as Ch
 
 from scipy.special import j1
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -159,13 +160,20 @@ class Order:
 
         part1 = X.dot(self.C_GP.dot(X.T))
         part2 = self.data_mat
-        CC = part1 + part2
+        CC = part2 #+ part2
 
         try:
             factor, flag = cho_factor(CC)
         except np.linalg.linalg.LinAlgError:
             print("Spectrum:", self.spectrum_id, "Order:", self.order)
             self.CC_debugger(CC)
+            np.save('X.npy', X)
+            np.save('part1.npy', part1)
+            np.save('part2.npy', part2)
+            np.save('cheb.npy', self.chebyshevSpectrum.k)
+            np.save('flux_mean.npy', self.flux_mean)
+            np.save('flux_std.npy', self.flux_std)
+            np.save('C_GP.npy', self.C_GP)
             raise
 
         try:
@@ -190,6 +198,7 @@ class Order:
         '''
         print('{:-^60}'.format('CC_debugger'))
         print("See https://github.com/iancze/Starfish/issues/26")
+        np.save('CC_matrix.npy', CC)
         print("Covariance matrix at a glance:")
         if (CC.diagonal().min() < 0.0):
             print("- Negative entries on the diagonal:")
@@ -416,9 +425,19 @@ except:
     print("Don't you want to use a user defined prior??")
     raise
 
+x_vec = np.arange(-1, 1, 0.01)
+def cheb_prior(p):
+    ch_tot = Ch([0, p[5], p[6], p[7]])
+    ch_spec = ch_tot(x_vec)
+    if not ( (np.max(ch_spec) < 0.03) and
+             (np.min(ch_spec) > -0.03) ):
+        return -np.inf
+
+    return 0.0
+
 # Insert the prior here
 def lnprob(p):
-    lp = lnprior(p)
+    lp = lnprior(p) + cheb_prior(p)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(p)
