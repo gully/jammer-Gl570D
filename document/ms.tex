@@ -1,0 +1,71 @@
+\documentclass[twocolumn]{emulateapj}% change onecolumn to iop for fancy, iop 
+
+\let\pwiflocal=\iffalse \let\pwifjournal=\iffalse
+\input{mgs_setup}
+
+\newcommand{\iancze}{{\sc C15}}
+
+\providecommand{\eprint}[1]{\href{http://arxiv.org/abs/#1}{#1}}
+\providecommand{\adsurl}[1]{\href{#1}{ADS}}
+\newcommand{\project}[1]{\textsl{#1}}
+
+\slugcomment{In preparation}
+\shorttitle{Brown dwarf retrievals with synthetic models}
+\shortauthors{TBD}
+
+\bibliographystyle{yahapj}
+
+\begin{document}
+ 
+\title{Forward modeling brown dwarf photospheres with pre-computed synthetic model spectra}
+
+\author{T.B. Determined,\altaffilmark{1}}
+
+
+\altaffiltext{1}{NASA Ames}
+
+\begin{abstract}
+We measure brown dwarf photospheres with \texttt{Starfish}, a forward modeling framework for synthetic spectral model grids.
+\end{abstract}
+
+\keywords{stars: fundamental parameters --- stars: individual (Gl570D) ---  stars: low-mass -- stars: statistics}
+
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+The cool photospheres of Brown dwarfs possess complex chemistry, yielding rich line-blanketing across optical and near-infrared bands \citep{2015ARA&A..53..279M}.
+
+
+\section{Observations}
+The observations were originally reported in \citet{2016arXiv161202809L}.
+
+\section{Method}
+We adapted the \texttt{Starfish} spectral inference framework \citep{czekala16, 2017ApJ...836..200G} to support the Marley et al (\emph{in prep.}) pre-computed synthetic model grid.
+
+\appendix
+
+\section{Adaptations of Starfish to handle differential resolution}
+
+The SpeX Prism mode offers low spectral resolution over a wide bandpass.  We altered the \texttt{Starfish} framework to accommodate a smoothly-varying spectral resolution as-a-function of wavelength.
+
+\acknowledgements
+We thank the NASA IRTF, which acquired the original spectra.
+
+{\it Facilities:} \facility{IRTF (SpeX)}
+
+{\it Software: } 
+ \project{pandas} \citep{mckinney10},
+ \project{emcee} \citep{foreman13},
+ \project{matplotlib} \citep{hunter07},
+ \project{numpy} \citep{vanderwalt11},
+ \project{scipy} \citep{jones01},
+ \project{ipython} \citep{perez07},
+ \project{starfish} \citep{czekala15},
+ \project{seaborn} \citep{waskom14}
+
+\clearpage
+
+\bibliographystyle{apj}
+\bibliography{ms}
+
+\end{document}
