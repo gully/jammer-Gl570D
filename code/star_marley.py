@@ -429,8 +429,8 @@ x_vec = np.arange(-1, 1, 0.01)
 def cheb_prior(p):
     ch_tot = Ch([0, p[5], p[6], p[7]])
     ch_spec = ch_tot(x_vec)
-    if not ( (np.max(ch_spec) < 0.03) and
-             (np.min(ch_spec) > -0.03) ):
+    if not ( (np.max(ch_spec) < 0.01) and
+             (np.min(ch_spec) > -0.01) ):
         return -np.inf
 
     return 0.0

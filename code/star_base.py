@@ -21,6 +21,7 @@ from itertools import chain
 import yaml
 import json
 
+from Starfish.model import ThetaParam, PhiParam
 
 # list of keys from 0 to (norders - 1)
 order_keys = np.arange(1)
