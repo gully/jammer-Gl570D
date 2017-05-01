@@ -9,6 +9,7 @@ notebooks/Untitled*
 *.png
 document/final/
 results/
+*.flx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
