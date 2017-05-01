@@ -159,7 +159,7 @@ class Order:
 
         part1 = X.dot(self.C_GP.dot(X.T))
         part2 = self.data_mat
-        CC = part2 #+ part2
+        CC = part2 + part1
 
         try:
             factor, flag = cho_factor(CC)
