@@ -22,7 +22,6 @@ from Starfish.spectrum import DataSpectrum, Mask, ChebyshevSpectrum
 from Starfish.emulator import Emulator
 import Starfish.constants as C
 from Starfish.covariance import get_dense_C, make_k_func, make_k_func_region
-from numpy.polynomial import Chebyshev as Ch
 
 from scipy.special import j1
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -156,7 +155,7 @@ class Order:
 
         self.lnprob_last = self.lnprob
 
-        X = (self.chebyshevSpectrum.k * self.flux_std * np.eye(self.ndata)).dot(self.eigenspectra.T)
+        X = (self.flux_std * np.eye(self.ndata)).dot(self.eigenspectra.T)
 
         part1 = X.dot(self.C_GP.dot(X.T))
         part2 = self.data_mat
@@ -170,7 +169,6 @@ class Order:
             np.save('X.npy', X)
             np.save('part1.npy', part1)
             np.save('part2.npy', part2)
-            np.save('cheb.npy', self.chebyshevSpectrum.k)
             np.save('flux_mean.npy', self.flux_mean)
             np.save('flux_std.npy', self.flux_std)
             np.save('C_GP.npy', self.C_GP)
@@ -178,7 +176,7 @@ class Order:
 
         try:
 
-            model1 = (self.chebyshevSpectrum.k * self.flux_mean + X.dot(self.mus))
+            model1 = (self.flux_mean + X.dot(self.mus))
             R = self.fl - model1
 
             logdet = np.sum(2 * np.log((np.diag(factor))))
@@ -338,10 +336,12 @@ class SampleThetaPhi(Order):
         def lnfunc(p):
             # Convert p array into a PhiParam object
             ind = self.npoly
-            if self.chebyshevSpectrum.fix_c0:
-                ind -= 1
+            #if self.chebyshevSpectrum.fix_c0:
+            #    ind -= 1
 
-            cheb = p[0:ind]
+            ind=0
+            #cheb = p[0:ind]
+            cheb = [0, 0, 0]
             sigAmp = p[ind]
             ind+=1
             logAmp = p[ind]
@@ -370,7 +370,10 @@ class SampleThetaPhi(Order):
         self.logger.debug("Updating nuisance parameters to {}".format(p))
 
         # Read off the Chebyshev parameters and update
-        self.chebyshevSpectrum.update(p.cheb)
+        ## May 1, 2017-- Turn off the Chebyshev spectrum for SpeX Prism mode.
+        ## See Issue #13 in jammer:
+        ## github.com/BrownDwarf/jammer/issues/13
+        #self.chebyshevSpectrum.update(p.cheb)
 
         # Check to make sure the global covariance parameters make sense
         #if p.sigAmp < 0.1:
@@ -396,8 +399,8 @@ def lnlike(p):
     try:
         pars1 = ThetaParam(grid=p[0:2], vz=p[2], vsini=p[3], logOmega=p[4])
         model.update_Theta(pars1)
-        # hard code npoly=3 (for fixc0 = True with npoly=4)
-        pars2 = PhiParam(0, 0, True, p[5:8], p[8], p[9], p[10])
+        # hard code npoly=3 (for fixc0 = True with chebyshev polynomials turned off)
+        pars2 = PhiParam(0, 0, True, [0.0, 0.0, 0.0], p[5], p[6], p[7])
         model.update_Phi(pars2)
         lnp = model.evaluate()
         return lnp
@@ -425,19 +428,9 @@ except:
     print("Don't you want to use a user defined prior??")
     raise
 
-x_vec = np.arange(-1, 1, 0.01)
-def cheb_prior(p):
-    ch_tot = Ch([0, p[5], p[6], p[7]])
-    ch_spec = ch_tot(x_vec)
-    if not ( (np.max(ch_spec) < 0.01) and
-             (np.min(ch_spec) > -0.01) ):
-        return -np.inf
-
-    return 0.0
-
 # Insert the prior here
 def lnprob(p):
-    lp = lnprior(p) + cheb_prior(p)
+    lp = lnprior(p)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(p)
@@ -448,12 +441,12 @@ start = Starfish.config["Theta"]
 fname = Starfish.specfmt.format(model.spectrum_id, model.order) + "phi.json"
 phi0 = PhiParam.load(fname)
 
-ndim, nwalkers = 11, 40
+ndim, nwalkers = 8, 40
 
 p0 = np.array(start["grid"] + [start["vz"], start["vsini"], start["logOmega"]] + 
-             phi0.cheb.tolist() + [phi0.sigAmp, phi0.logAmp, phi0.l])
+             [phi0.sigAmp, phi0.logAmp, phi0.l])
 
-p0_std = [5, 0.02, 0.5, 0.5, 0.01, 0.005, 0.005, 0.005, 0.01, 0.001, 0.5]
+p0_std = [5, 0.02, 0.5, 0.5, 0.01, 0.01, 0.001, 0.5]
 
 if args.resume:
     p0_ball = np.load("emcee_chain.npy")[:,-1,:]
