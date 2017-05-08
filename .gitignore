@@ -10,6 +10,9 @@ notebooks/Untitled*
 document/final/
 results/
 *.flx
+data/IGRINS/
+sf/2M0136/
+*.mp4
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
